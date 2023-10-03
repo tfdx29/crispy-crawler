@@ -1,42 +1,24 @@
 pipeline {
     agent any
- 
+
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
- 
-        stage('Crawl Website') {
+        stage('Build and Run Hello World Docker Container') {
             steps {
                 script {
-                    // Pull the Docker image
-                    docker.image('algolia/docsearch-scraper').pull()
-                    
-                    // Run the scraper inside the Docker container
-                    def scraper = docker.image('algolia/docsearch-scraper').run('-u', 'https://sameer-jsohi.com.np')
-                    
-                    // Wait for the container to finish
-                    def exitCode = scraper.wait()
-                    
-                    // Check the exit code
-                    if (exitCode == 0) {
-                        currentBuild.result = 'SUCCESS'
-                    } else {
-                        currentBuild.result = 'FAILURE'
-                    }
+                    // Pull a Docker image (if needed)
+                    docker.image('hello-world').pull()
+
+                    // Run the Hello World Docker container
+                    def helloContainer = docker.image('hello-world').run()
+
+                    // Wait for the container to exit (optional)
+                    helloContainer.wait()
+
+                    // Clean up the container (optional)
+                    helloContainer.stop()
+                    helloContainer.remove()
                 }
             }
-        }
-    }
- 
-    post {
-        success {
-            echo 'Website crawl successful!'
-        }
-        failure {
-            echo 'Website crawl failed!'
         }
     }
 }
